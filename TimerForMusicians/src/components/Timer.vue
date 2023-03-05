@@ -19,8 +19,6 @@ let desiredSeconds = ref(0);
 let desiredMinutes = ref(0);
 let desiredHours = ref(0);
 
- 
-
 function startTimerObject() : void {
     timer = new TimingObject();
     timerObjectStarted.value = true;
@@ -31,11 +29,8 @@ function startTimerObject() : void {
 startTimerObject();
 
 function startTimer() : void {
-    while (Date.now() % 3000 != 0) {
-        continue
-    }
-    timerStarted.value = true;
     timer.update({ velocity: 1 });
+    timerStarted.value = true;
     hoursLock.value = true;
     minutesLock.value = true;
 };
