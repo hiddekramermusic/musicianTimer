@@ -62,6 +62,7 @@ Anybody can also enter a new timecode to start from. The first box is the hours,
 If a composer or conductor is leading the session, it's advised they use a laptop to log in to the app, and control the timers of the others from there. 
 
 NOTES:
+
 This app created direct connections between everybody (e.g. with 5 people, you will have 5 x 5 = 25 connections).
 This means that bigger groups could start to introduce some problems. I did not test this yet so I'm not sure where the limit is, but at least 5 people should work fine. 
 
