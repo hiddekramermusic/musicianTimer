@@ -12,6 +12,8 @@ This app relies heavily on the web timing libraries by Christoph Guttandin: http
 STEPS TO GET SET UP:
 
 Before starting this app, make sure you have node js installed on your system: https://nodejs.org/en/ (or through 'brew install node' or other package managers).
+
+Then download this full Github Repository.
 #
 Open a terminal or command window (or open the folder with a code editor like visual studio code, and open a terminal window in there) 
 
