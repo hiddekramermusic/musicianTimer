@@ -1,7 +1,54 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import {TimingObject} from "timing-object";
 import { tsIndexSignature, whileStatement } from "@babel/types";
+
+let socket : WebSocket;
+let connectedStatus = 'Not Connected!';
+let message = '';
+
+async function onMounted() {
+    const socketProtocol = (window.location.protocol === 'https:' ? 'wss' : 'ws:');
+    const port = ':3000';
+    const echoSocketurl = socketProtocol + '//' + window.location.hostname + port + '/ws';
+
+    socket = new WebSocket(echoSocketurl);
+
+    socket.onopen = () => {
+        console.log('Websocket connected.');
+        connectedStatus = 'Connected';
+
+    }
+}
+
+function waitForOpenConnection() {
+    return new Promise((resolve, reject) => {
+        const maxAttempts = 10;
+        const intervalTime = 200;
+
+        let currentAttempt = 0;
+        const interval = setInterval(() => {
+            if (currentAttempt > maxAttempts - 1) {
+                clearInterval(interval);
+                reject(new Error('Max nr. of ws connection attempts reached'));
+            } else if (socket.readyState === socket.OPEN) {
+                clearInterval(interval);
+                resolve(0);
+            }
+            currentAttempt++
+        });
+    })
+}
+
+async function sendMessage(message: any) {
+    if (socket.readyState !== socket.OPEN) {
+        try {
+            await waitForOpenConnection();
+        } catch (err) { console.error(err) }
+    } else {
+        socket.send(message);
+    }
+}
 
 let timer: any;
 let timerObjectStarted = ref(false);

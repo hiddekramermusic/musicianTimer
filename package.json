@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@vue/cli": "^5.0.8",
+    "express-ws": "^5.0.2",
     "ntp-client": "^0.5.3",
     "ntp-time-sync": "^0.3.0",
     "timesync": "^1.0.11",
