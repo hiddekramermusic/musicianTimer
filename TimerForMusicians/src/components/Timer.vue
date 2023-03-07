@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import {TimingObject} from "timing-object";
+import { TimingProvider } from 'timing-provider';
 import { tsIndexSignature, whileStatement } from "@babel/types";
 
 let socket : WebSocket;
+let timingProviderPort = ':4000';
+let timingprovider : TimingProvider;
+let ts : any;
+let now: number;
 let connectedStatus = 'Not Connected!';
 let message = '';
 
 function setupWebSocket() {
     const socketProtocol = (window.location.protocol === 'https:' ? 'wss' : 'ws:');
-    const port = ':3000';
-    const echoSocketurl = socketProtocol + '//' + window.location.hostname + port + '/ws';
+    const socketport = ':3000';
+    const echoSocketurl = socketProtocol + '//' + window.location.hostname + socketport + '/ws';
 
     socket = new WebSocket(echoSocketurl);
 
@@ -58,8 +63,8 @@ function waitForOpenConnection() {
                 resolve(0);
             }
             currentAttempt++
-        });
-    })
+        }, intervalTime);
+    });
 }
 
 async function sendMessage(message: any) {
@@ -89,14 +94,15 @@ let desiredMinutes = ref(0);
 let desiredHours = ref(0);
 
 function startTimerObject() : void {
-    timer = new TimingObject();
+    try {
+        timer = new TimingObject(new TimingProvider('ws://' + window.location.hostname + timingProviderPort));
+    } catch (err) { console.error(err) };
     timerObjectStarted.value = true;
     timer.update({ velocity: 0 });
     timer.update({ position: 0 });
 }
 
 startTimerObject();
-
 //Global (via server) timer functions:
 
 function startAllTimers() : void {
@@ -176,7 +182,7 @@ function skipToTimeCode () {
 requestAnimationFrame(function incrementTimer() {
     if (timerStarted.value == true) {
         let timeVector = timer.query();
-        console.log(timeVector);
+        // console.log(timeVector);
         let currentSeconds = Math.floor(timeVector.position)
         if (currentSeconds > lastTimerValue.value) {
             seconds.value++

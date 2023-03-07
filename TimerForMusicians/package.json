@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "appopen": "vite --host",
-    "socketopen": "cd .. && npx nodemon index.mjs",
+    "app": "vite --host",
+    "websocket": "npx nodemon index.mjs",
+    "timesync": "npx timing-provider-server --port 4000",
     "build": "run-p type-check build-only",
     "preview": "vite preview",
     "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
@@ -21,7 +22,10 @@
     "express": "^4.18.2",
     "express-ws": "^5.0.2",
     "http": "^0.0.1-security",
+    "nodemon": "^2.0.21",
     "path": "^0.12.7",
+    "timing-provider": "^6.2.15",
+    "timing-provider-server": "^5.0.7",
     "url": "^0.11.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6"

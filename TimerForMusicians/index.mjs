@@ -7,9 +7,8 @@ const __dirname = path.dirname(__filename);
 import express from 'express'
 import expressWs from 'express-ws'
 import http from 'http'
-import { Socket } from 'dgram';
 
-// Our port
+//Timing Object logic. 
 let port = 3000;
 
 // App and server
@@ -23,9 +22,15 @@ app.use(express.static(__dirname + '/views'));
 
 class wsStore {
     wsArray = [];
+    masterSet = false;
 
     addWebSocket (ws) {
         this.wsArray.push(ws);
+        //Check if first connection. If so they become the 'master timer'. Only if timing object in server does not work. 
+        // if (this.wsArray.length == 1) {
+        //     this.masterSet == true;
+        //     ws.send(JSON.stringify({"id" : "master"}))
+        // };
     }
 
     removeWebSocket (ws) {
@@ -46,8 +51,8 @@ app.get('/', (req, res) => {
 
 // Get the /ws websocket route
 app.ws('/ws', async function(ws, req) {
-    console.log("New connection has opened! Total number of current connections: " + websockets.getWebSockets().length)
     websockets.addWebSocket(ws);
+    console.log("New connection has opened! Total number of current connections: " + websockets.getWebSockets().length)
 
     ws.on('close', async function() {
         websockets.removeWebSocket(ws);
