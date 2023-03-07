@@ -56,16 +56,19 @@ app.ws('/ws', async function(ws, req) {
 
     ws.on('message', async function(msg) {
         console.log("Received message: " + msg);
-        // Start listening for messages
-        switch (msg) {
-            case (msg.id == 'startTimers'):
+        let parsedMessage = JSON.parse(msg);
+        switch (parsedMessage.id) {
+            case ('startTimers'):
                 startTimers();
                 break;
-            case (msg.id == 'stopTimers'):
+            case ('stopTimers'):
                 stopTimers();
                 break;
-            case (msg.id == 'setNewTimerValues'):
-                setNewTimerValues(msg.hours,msg.minutes,msg.seconds);
+            case ('resetTimers'):
+                resetTimers();
+                break;
+            case ('setNewTimerValues'):
+                setNewTimerValues(parsedMessage.hours,parsedMessage.minutes,parsedMessage.seconds);
                 break;
             default:
                 ws.send(JSON.stringify({"id" : "error", "message" : "message not understood"}));
@@ -80,10 +83,16 @@ function startTimers() {
 };
 
 function stopTimers() {
-    websockets.getWebScokets().forEach(ws => {
+    websockets.getWebSockets().forEach(ws => {
         ws.send(JSON.stringify({"id" : "stopTimer"}));
     });
 };
+
+function resetTimers() {
+    websockets.getWebSockets().forEach(ws => {
+        ws.send(JSON.stringify({"id" : "resetTimer"}));
+    })
+}
 
 function setNewTimerValues(hours, minutes, seconds) {
     websockets.getWebSockets().forEach(ws => {

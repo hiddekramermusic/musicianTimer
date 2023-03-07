@@ -7,7 +7,7 @@ let socket : WebSocket;
 let connectedStatus = 'Not Connected!';
 let message = '';
 
-async function onMounted() {
+function setupWebSocket() {
     const socketProtocol = (window.location.protocol === 'https:' ? 'wss' : 'ws:');
     const port = ':3000';
     const echoSocketurl = socketProtocol + '//' + window.location.hostname + port + '/ws';
@@ -17,9 +17,31 @@ async function onMounted() {
     socket.onopen = () => {
         console.log('Websocket connected.');
         connectedStatus = 'Connected';
+    };
 
+    socket.onmessage = (msg) => {
+        let parsedMessage = JSON.parse(msg.data);
+        console.log(parsedMessage);
+        switch(parsedMessage.id) {
+            case ('startTimer'):
+                startTimer();
+                break;
+            case ('stopTimer'):
+                stopTimer();
+                break;
+            case('resetTimer'):
+                resetTimer();
+                break;
+            case ('setNewTimerValues'):
+                desiredHours.value = parseInt(parsedMessage.hours);
+                desiredMinutes.value = parseInt(parsedMessage.minutes);
+                desiredSeconds.value = parseInt(parsedMessage.seconds);
+                skipToTimeCode();
+        }
     }
-}
+};
+
+setupWebSocket();
 
 function waitForOpenConnection() {
     return new Promise((resolve, reject) => {
@@ -74,6 +96,38 @@ function startTimerObject() : void {
 }
 
 startTimerObject();
+
+//Global (via server) timer functions:
+
+function startAllTimers() : void {
+    sendMessage(JSON.stringify({
+        "id" : "startTimers"
+    }));
+};
+
+function stopAllTimers() : void {
+    sendMessage(JSON.stringify({
+        "id" : "stopTimers"
+    }));
+}
+
+function resetAllTimers() : void {
+    sendMessage(JSON.stringify({
+        "id" : "resetTimers"
+    }));
+}
+
+function skipToTimeCodeAll() : void {
+    sendMessage(JSON.stringify({
+        "id" : "setNewTimerValues",
+        "hours" : desiredHours.value,
+        "minutes" : desiredMinutes.value,
+        "seconds" : desiredSeconds.value
+    }))
+}
+
+
+//Local timer functions:
 
 function startTimer() : void {
     timer.update({ velocity: 1 });
@@ -154,13 +208,13 @@ requestAnimationFrame(function incrementTimer() {
 
 <template>
     <div v-if="timerObjectStarted == true">
-        <span><p>h/m/s</p><h1 style="font-size: xx-large;">{{ hours }}:{{ minutes }}:{{ seconds }}</h1></span>
-        <button @click="startTimer">Start</button>
-        <button @click="stopTimer">Stop</button>
-        <button @click="resetTimer">Reset</button> 
+        <span><p>h/m/s</p><h1 style="font-size: 10em; max-width: 90vw;">{{ hours }}:{{ minutes }}:{{ seconds }}</h1></span>
+        <button @click="startAllTimers">Start</button>
+        <button @click="stopAllTimers">Stop</button>
+        <button @click="resetAllTimers">Reset</button> 
         <br><br><hr><br><br>
         <h1><input type="number" v-model="desiredHours" placeholder="hours" />:<input type="number" v-model="desiredMinutes" placeholder="minutes"/>:<input type="number" v-model="desiredSeconds" placeholder="seconds"></h1>        
-        <button @click="skipToTimeCode">Choose new time</button>
+        <button @click="skipToTimeCodeAll">Choose new time</button>
     </div>
     <div v-else>
         <h1>Loading..</h1>
