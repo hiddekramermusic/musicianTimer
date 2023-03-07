@@ -7,9 +7,16 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: TimerView
+      component: TimerView,
+      meta: {
+        title: 'Timer App'
+      }
     }
   ]
+})
+
+router.beforeEach((to, from) => {
+  document.title = to.meta?.title ?? 'Timer App'
 })
 
 export default router
