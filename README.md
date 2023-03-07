@@ -2,7 +2,7 @@ Simple timer app to keep multiple timers in sync across devices.
 Main aim is to run this app during rehearsals or performances, on a locally created closed network. 
 
 To use this app, you need a router to create the local network, and a computer to run the app. 
-All musicians can use to the app with any phone, tablet, or laptop. Using their web browser, if they're connected to the local network. 
+All musicians can use the app with any phone, tablet, or laptop. Using their web browser, if they're connected to the local network. 
 The local network should ideally not be connected to the internet. This ensures the best performance, and the phones and computers will not receive so many interruptions from other apps over the network in this way. 
 
 This app relies heavily on the web timing libraries by Christoph Guttandin: https://github.com/chrisguttandin?tab=repositories&q=timing&type=&language=&sort=
