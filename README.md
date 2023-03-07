@@ -9,7 +9,7 @@ This app relies heavily on the web timing libraries by Christoph Guttandin: http
 
 ------------------------
 
-STEPS TO GET SET UP:
+STEPS TO GET SET UP (just for running the server, the musicians don't need these steps):
 
 Before starting this app, make sure you have node js installed on your system: https://nodejs.org/en/ (or through 'brew install node' or other package managers).
 
