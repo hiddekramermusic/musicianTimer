@@ -6,11 +6,12 @@ import { tsIndexSignature, whileStatement } from "@babel/types";
 
 let socket : WebSocket;
 let timingProviderPort = ':4000';
-let timingprovider : TimingProvider;
+let timingprovider : typeof TimingProvider;
 let ts : any;
 let now: number;
 let connectedStatus = 'Not Connected!';
 let message = '';
+
 
 function setupWebSocket() {
     const socketProtocol = (window.location.protocol === 'https:' ? 'wss' : 'ws:');
@@ -42,6 +43,18 @@ function setupWebSocket() {
                 desiredMinutes.value = parseInt(parsedMessage.minutes);
                 desiredSeconds.value = parseInt(parsedMessage.seconds);
                 skipToTimeCode();
+            case ('supplyYourTimes'):
+                socket.send(JSON.stringify({
+                    "id" : "suppliedTimes",
+                    "hours" : hours.value,
+                    "minutes" : minutes.value,
+                    "seconds" : seconds.value
+                }))
+            case ('updateTimesOnLoad'):
+                hours.value = parseInt(parsedMessage.hours);
+                minutes.value = parseInt(parsedMessage.minutes);
+                seconds.value = parseInt(parsedMessage.seconds);
+
         }
     }
 };
@@ -93,16 +106,27 @@ let desiredSeconds = ref(0);
 let desiredMinutes = ref(0);
 let desiredHours = ref(0);
 
-function startTimerObject() : void {
-    try {
-        timer = new TimingObject(new TimingProvider('ws://' + window.location.hostname + timingProviderPort));
-    } catch (err) { console.error(err) };
-    timerObjectStarted.value = true;
-    timer.update({ velocity: 0 });
-    timer.update({ position: 0 });
+async function startTimerObject() : Promise<unknown> {
+    await waitForOpenConnection();
+    return new Promise((resolve, reject) => {
+        try {
+            timer = new TimingObject(new TimingProvider('ws://' + window.location.hostname + timingProviderPort));
+            resolve(0)
+        } catch (err) { reject(new Error("Could not set up Timing Object!")) };
+    });
 }
 
-startTimerObject();
+startTimerObject().then((promise) => {
+    if (promise == 0) {
+        timerObjectStarted.value = true;
+        timer.update({ velocity: 0 });
+        timer.update({ position: 0 });
+        socket.send(JSON.stringify({"id" : "getTimerValuesOnLoad"}));
+    } else {
+        console.error(promise);
+        window.alert(promise);
+    }
+});
 //Global (via server) timer functions:
 
 function startAllTimers() : void {
