@@ -1,4 +1,4 @@
-import path from 'path'
+import path, { parse } from 'path'
 import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +43,7 @@ class wsStore {
 }
 
 let websockets = new wsStore();
+let requestorWs;
 
 // Get the route / 
 app.get('/', (req, res) => {
@@ -75,6 +76,19 @@ app.ws('/ws', async function(ws, req) {
             case ('setNewTimerValues'):
                 setNewTimerValues(parsedMessage.hours,parsedMessage.minutes,parsedMessage.seconds);
                 break;
+            case ('getTimerValuesOnLoad'):
+                requestorWs = websockets.getWebSockets();
+                requestorWs = requestorWs[requestorWs.length -1];
+                if (websockets.getWebSockets().length > 1) {
+                    let socketArray = websockets.getWebSockets()
+                    socketArray[0].send(JSON.stringify({
+                        "id" : "supplyYourTimes"
+                    }));
+                }
+                break;
+            case('suppliedTimes'):
+                updateTimesForReload(requestorWs, parsedMessage.running);
+                break;
             default:
                 ws.send(JSON.stringify({"id" : "error", "message" : "message not understood"}));
         };
@@ -103,4 +117,14 @@ function setNewTimerValues(hours, minutes, seconds) {
     websockets.getWebSockets().forEach(ws => {
         ws.send(JSON.stringify({"id": "setNewTimerValues", "hours" : hours, "minutes" : minutes, "seconds" : seconds}));
     });
+};
+
+function updateTimesForReload(requestor, hours, minutes, seconds, timerRunning) {
+        requestor.send(JSON.stringify({
+            "id" : "updateTimesOnLoad",
+            "hours" : hours,
+            "minutes" : minutes,
+            "seconds" : seconds,
+            "running" : timerRunning
+        }));
 };
