@@ -12,6 +12,22 @@ let now: number;
 let connectedStatus = 'Not Connected!';
 let message = '';
 
+let timer: any;
+let timerObjectStarted = ref(false);
+let timerStarted = ref(false);
+let lastTimerValue = ref(0);
+
+let seconds = ref(0);
+let minutes = ref(0);
+let hours = ref(0);
+
+let hoursLock = ref(true);
+let minutesLock = ref(true);
+
+let desiredSeconds = ref(0);
+let desiredMinutes = ref(0);
+let desiredHours = ref(0);
+
 
 function setupWebSocket() {
     const socketProtocol = (window.location.protocol === 'https:' ? 'wss' : 'ws:');
@@ -39,21 +55,23 @@ function setupWebSocket() {
                 resetTimer();
                 break;
             case ('setNewTimerValues'):
-                desiredHours.value = parseInt(parsedMessage.hours);
-                desiredMinutes.value = parseInt(parsedMessage.minutes);
-                desiredSeconds.value = parseInt(parsedMessage.seconds);
-                skipToTimeCode();
+                let hours = parseFloat(parsedMessage.hours);
+                let minutes = parseFloat(parsedMessage.minutes);
+                let seconds = parseFloat(parsedMessage.seconds);
+                stopAllTimers();
+                skipToTimeCode(hours, minutes, seconds);
+                break;
             case ('supplyYourTimes'):
                 socket.send(JSON.stringify({
                     "id" : "suppliedTimes",
-                    "hours" : hours.value,
-                    "minutes" : minutes.value,
-                    "seconds" : seconds.value
-                }))
+                    "running" : timerStarted.value
+                }));
+                break;
             case ('updateTimesOnLoad'):
-                hours.value = parseInt(parsedMessage.hours);
-                minutes.value = parseInt(parsedMessage.minutes);
-                seconds.value = parseInt(parsedMessage.seconds);
+                if (parsedMessage.running === true) {
+                    startTimer();
+                };
+                break;
 
         }
     }
@@ -89,22 +107,6 @@ async function sendMessage(message: any) {
         socket.send(message);
     }
 }
-
-let timer: any;
-let timerObjectStarted = ref(false);
-let timerStarted = ref(false);
-let lastTimerValue = ref(0);
-
-let seconds = ref(0);
-let minutes = ref(0);
-let hours = ref(0);
-
-let hoursLock = ref(true);
-let minutesLock = ref(true);
-
-let desiredSeconds = ref(0);
-let desiredMinutes = ref(0);
-let desiredHours = ref(0);
 
 async function startTimerObject() : Promise<unknown> {
     await waitForOpenConnection();
@@ -170,70 +172,39 @@ function stopTimer() : void {
     timerStarted.value = false;
     lastTimerValue.value = 0;
     timer.update({ velocity: 0 });
-    timer.update({ position: 0 });
 };
 
 function resetTimer(): void {
     stopTimer();
-    seconds.value = 0;
-    minutes.value = 0;
-    hours.value = 0;
+    timer.update({ position: 0 });
 }
 
-function skipToTimeCode () {
-    if (desiredHours.value < 0 || desiredMinutes.value < 0 || desiredSeconds.value < 0) {
+function skipToTimeCode (hours: number, minutes: number, seconds: number) {
+    if (hours < 0 || minutes < 0 || seconds < 0) {
         return
     }
-    hours.value = desiredHours.value;
-    if (desiredMinutes.value >= 60) {
-        minutes.value = desiredMinutes.value % 60;
-        hours.value += Math.floor(desiredMinutes.value/60);
-    } else {
-        minutes.value = desiredMinutes.value;
+    if (Number.isNaN(hours) || Number.isNaN(minutes) || Number.isNaN(seconds)) {
+        return
     }
-    if (desiredSeconds.value >= 60) {
-        seconds.value = desiredSeconds.value % 60;
-        minutes.value += Math.floor(desiredSeconds.value/60);
-        if (minutes.value >= 60) {
-            hours.value += Math.floor(minutes.value/60);
-            minutes.value = minutes.value % 60;
-        }
-    } else {
-        seconds.value = desiredSeconds.value;
-    }
+    let newPos = (hours * 3600) + (minutes * 60) + seconds;
+    timer.update({position: newPos} );
 }
 
 requestAnimationFrame(function incrementTimer() {
-    if (timerStarted.value == true) {
-        let timeVector = timer.query();
-        // console.log(timeVector);
-        let currentSeconds = Math.floor(timeVector.position)
-        if (currentSeconds > lastTimerValue.value) {
-            seconds.value++
-            lastTimerValue.value = currentSeconds
-        };
-        seconds.value = seconds.value % 60;
-        if (seconds.value % 60 == 0) {
-            if (minutesLock.value == false){
-                minutes.value++;
-                minutesLock.value = true;
-            } 
-        } else {
-            minutesLock.value = false;
-        }
-        if (minutes.value % 60 == 0) {
-            if (hoursLock.value == false) {
-                hours.value++
-                hoursLock.value = true;
-            }
-        } else {
-            hoursLock.value = false;
-        }
+    let timeVector = null;
+    try {
+        timeVector = timer.query();
+    } catch (err) {
+        console.error(err)
+    }
+    if (timeVector != null) {
+        console.log(timeVector);
+        seconds.value = Math.floor(timeVector.position % 60);
+        minutes.value = Math.floor(timeVector.position / 60) % 60;
+        hours.value = Math.floor(timeVector.position / 3600);
     }
     requestAnimationFrame(incrementTimer);
 });
-
-
 </script>
 
 <template>

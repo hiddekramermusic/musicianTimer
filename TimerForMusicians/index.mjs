@@ -43,6 +43,7 @@ class wsStore {
 }
 
 let websockets = new wsStore();
+let requestorWs;
 
 // Get the route / 
 app.get('/', (req, res) => {
@@ -76,14 +77,18 @@ app.ws('/ws', async function(ws, req) {
                 setNewTimerValues(parsedMessage.hours,parsedMessage.minutes,parsedMessage.seconds);
                 break;
             case ('getTimerValuesOnLoad'):
-                if (websockets.length > 1) {
-                    websockets.getWebSockets()[0].send(JSON.stringify({
+                requestorWs = websockets.getWebSockets();
+                requestorWs = requestorWs[requestorWs.length -1];
+                if (websockets.getWebSockets().length > 1) {
+                    let socketArray = websockets.getWebSockets()
+                    socketArray[0].send(JSON.stringify({
                         "id" : "supplyYourTimes"
                     }));
                 }
                 break;
             case('suppliedTimes'):
-                updateTimesForReload(parsedMessage.hours, parsedMessage.minutes, parsedMessage.seconds);
+                updateTimesForReload(requestorWs, parsedMessage.running);
+                break;
             default:
                 ws.send(JSON.stringify({"id" : "error", "message" : "message not understood"}));
         };
@@ -114,13 +119,12 @@ function setNewTimerValues(hours, minutes, seconds) {
     });
 };
 
-function updateTimesForReload(hours, minutes, seconds) {
-    websockets.getWebSockets().forEach(ws => {
-        ws.send(JSON.stringify({
+function updateTimesForReload(requestor, hours, minutes, seconds, timerRunning) {
+        requestor.send(JSON.stringify({
             "id" : "updateTimesOnLoad",
             "hours" : hours,
             "minutes" : minutes,
-            "seconds" : seconds
+            "seconds" : seconds,
+            "running" : timerRunning
         }));
-    });
 };
