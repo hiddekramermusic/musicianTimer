@@ -2,7 +2,7 @@
 import { ref, watch, onMounted } from "vue";
 import {TimingObject} from "timing-object";
 import { TimingProvider } from 'timing-provider';
-import { tsIndexSignature, whileStatement } from "@babel/types";
+import { count } from "rxjs";
 
 let socket : WebSocket;
 let timingProviderPort = ':4000';
@@ -20,6 +20,9 @@ let lastTimerValue = ref(0);
 let seconds = ref(0);
 let minutes = ref(0);
 let hours = ref(0);
+
+let countdownComplete = ref(true);
+let countdown = ref(5);
 
 let hoursLock = ref(true);
 let minutesLock = ref(true);
@@ -69,7 +72,7 @@ function setupWebSocket() {
                 break;
             case ('updateTimesOnLoad'):
                 if (parsedMessage.running === true) {
-                    startTimer();
+                    startTimerWithoutCountdown();
                 };
                 break;
 
@@ -161,12 +164,37 @@ function skipToTimeCodeAll() : void {
 
 //Local timer functions:
 
-function startTimer() : void {
+function startTimer() {
+    countdownComplete.value = false;
+    countdown.value = 5.0;
+    startCountdown();
+};
+
+function startTimerWithoutCountdown() {
     timer.update({ velocity: 1 });
     timerStarted.value = true;
     hoursLock.value = true;
-    minutesLock.value = true;
-};
+    minutesLock.value = true; 
+}
+
+function startCountdown() {
+    let oldVector = timer.query();
+    let newVector : any;
+    requestAnimationFrame(function updateCountdown() {
+        newVector = timer.query();
+        countdown.value = 5.0 - Math.floor(newVector.timestamp - oldVector.timestamp);
+        if (Math.floor(newVector.timestamp - oldVector.timestamp) < 5) {
+            requestAnimationFrame(updateCountdown);
+        } else {
+            countdownComplete.value = true;
+            timer.update({ velocity: 1 });
+            timerStarted.value = true;
+            hoursLock.value = true;
+            minutesLock.value = true;
+        }
+    });
+    console.log("timer completed");
+}
 
 function stopTimer() : void {
     timerStarted.value = false;
@@ -209,7 +237,12 @@ requestAnimationFrame(function incrementTimer() {
 
 <template>
     <div v-if="timerObjectStarted == true">
-        <span><p>h/m/s</p><h1 style="font-size: 10em; max-width: 90vw;">{{ hours }}:{{ minutes }}:{{ seconds }}</h1></span>
+        <div v-if="countdownComplete == true">
+            <span><p>h/m/s</p><h1 style="font-size: 10em; width: 40vw;">{{ hours < 10 ? 0 : null}}{{ hours }}:{{ minutes < 10 ? 0 : null}}{{ minutes }}:{{ seconds < 10 ? 0 : null}}{{ seconds }}</h1></span>
+        </div>
+        <div v-else>
+            <span><p>Countdown:</p><br><h1 style="font-size: 10em; width: 40vw; background-color: blue; text-align: center; color: white;">{{ countdown }}</h1></span>
+        </div>
         <button @click="startAllTimers">Start</button>
         <button @click="stopAllTimers">Stop</button>
         <button @click="resetAllTimers">Reset</button> 

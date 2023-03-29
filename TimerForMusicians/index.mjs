@@ -26,11 +26,6 @@ class wsStore {
 
     addWebSocket (ws) {
         this.wsArray.push(ws);
-        //Check if first connection. If so they become the 'master timer'. Only if timing object in server does not work. 
-        // if (this.wsArray.length == 1) {
-        //     this.masterSet == true;
-        //     ws.send(JSON.stringify({"id" : "master"}))
-        // };
     }
 
     removeWebSocket (ws) {
