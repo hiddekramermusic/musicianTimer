@@ -4,7 +4,7 @@ import {TimingObject} from "timing-object";
 import { TimingProvider } from 'timing-provider';
 import { count } from "rxjs";
 
-let socket : WebSocket;
+let socket : WebSocket | null;
 let timingProviderPort = ':4000';
 let timingprovider : typeof TimingProvider;
 let ts : any;
@@ -37,11 +37,18 @@ function setupWebSocket() {
     const socketport = ':3000';
     const echoSocketurl = socketProtocol + '//' + window.location.hostname + socketport + '/ws';
 
+    socket = null;
     socket = new WebSocket(echoSocketurl);
 
     socket.onopen = () => {
         console.log('Websocket connected.');
         connectedStatus = 'Connected';
+    };
+
+    socket.onclose = () => {
+        try {
+            setupWebSocket();
+        } catch (error) {console.log(error)}
     };
 
     socket.onmessage = (msg) => {
