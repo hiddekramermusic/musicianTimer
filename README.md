@@ -65,8 +65,7 @@ If a composer or conductor is leading the session, it's advised they use a lapto
 
 NOTES:
 
-This app created direct connections between everybody (e.g. with 5 people, you will have 5 x 5 = 25 connections).
-This means that bigger groups could start to introduce some problems. I did not test this yet so I'm not sure where the limit is, but at least 5 people should work fine. 
+So far I only tested this app with about 6-7 people connecting. I'm not sure at what group size problems with synchronization might be introduced, so test carefully if you are working with larger groups. Let me know if you have succesfully worked with larger groups so I can update this text!
 
 For phones or tablets - and also for computers actually, make sure to completely disable your screen sleep and auto lock in your settings. 
 If the device goes to sleep or is locked, the connection to the communication server will be closed and the timer will not respond anymore until you reload. It will keep running however, so in case of a performance you will still have a reliable timer that continues. 
