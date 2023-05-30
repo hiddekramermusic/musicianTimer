@@ -65,11 +65,14 @@ If a composer or conductor is leading the session, it's advised they use a lapto
 
 NOTES:
 
-So far I only tested this app with about 6-7 people connecting. I'm not sure at what group size problems with synchronization might be introduced, so test carefully if you are working with larger groups. Let me know if you have succesfully worked with larger groups so I can update this text!
+- If one of your players loses their connection, they can simply reload the app. Their timer will be synced with the rest and start running automatically if the other timers are also running. 
 
-For phones or tablets - and also for computers actually, make sure to completely disable your screen sleep and auto lock in your settings. 
+- So far I only tested this app with about 6-7 people connecting. I'm not sure at what group size problems with synchronization might be introduced, so test carefully if you are working with larger groups. Let me know if you have succesfully worked with larger groups so I can update this text!
+
+- For phones or tablets - and also for computers actually, make sure to completely disable your screen sleep and auto lock in your settings. 
 If the device goes to sleep or is locked, the connection to the communication server will be closed and the timer will not respond anymore until you reload. It will keep running however, so in case of a performance you will still have a reliable timer that continues. 
 
-I am planning to add a method that will automatically sync the current state of your timer to the rest, if you join later, which should help if this closing of the connection happens.  
+- If there are other networks present that your phone or tablet might auto-connect with, make sure to disable autoconnect in your network settings. Because your local router will not have an actual internet connection - only locally for the app - phones and tablets will automatically start looking for other networks they can autoconnect to which do have internet. 
+
 
 
