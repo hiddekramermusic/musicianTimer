@@ -27,7 +27,7 @@
     "timing-provider": "^6.2.15",
     "timing-provider-server": "^5.0.7",
     "url": "^0.11.0",
-    "vue": "^3.2.47",
+    "vue": "^3.3.4",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
